@@ -173,3 +173,88 @@
   - Verify all pages load correctly from dist/
   - Ensure all tests pass, ask the user if questions arise
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
+
+- [x] 12. Set up secret detection and security
+  - [x] 12.1 Install and configure Gitleaks
+    - Install Gitleaks as dev dependency
+    - Create `.gitleaks.toml` configuration file
+    - Configure detection rules for common secret patterns (API keys, tokens, private keys)
+    - Add allowlist for false positives and documentation files
+    - _Requirements: 8.1, 8.2_
+  
+  - [x] 12.2 Set up pre-commit hooks
+    - Install Husky for Git hook management
+    - Create pre-commit hook that runs Gitleaks
+    - Configure hook to block commits containing secrets
+    - Add helpful error messages for developers
+    - _Requirements: 8.3_
+  
+  - [x] 12.3 Create environment variable template
+    - Create `.env.example` file documenting required variables
+    - Add site URL and placeholder for future API keys
+    - Document PUBLIC_ prefix convention for client-side variables
+    - Ensure `.env` is in `.gitignore`
+    - _Requirements: 8.5_
+  
+  - [x] 12.4 Write security documentation
+    - Create `SECURITY.md` with comprehensive security guide
+    - Document all protection layers (pre-commit, CI/CD, manual)
+    - Provide examples of what gets detected
+    - Include best practices for using environment variables
+    - Document remediation steps if secrets are detected
+    - Add troubleshooting section
+    - _Requirements: 8.5_
+
+- [x] 13. Set up automated deployment
+  - [x] 13.1 Create GitHub Actions workflow
+    - Create `.github/workflows/deploy.yml`
+    - Configure build job (checkout, setup Node, install, build)
+    - Configure deploy job (deploy to GitHub Pages)
+    - Set up proper permissions (contents, pages, id-token)
+    - Add concurrency control to prevent simultaneous deployments
+    - _Requirements: 9.1, 9.2, 9.4_
+  
+  - [x] 13.2 Configure Astro for GitHub Pages
+    - Update `astro.config.mjs` with site and base configuration
+    - Ensure build output is compatible with GitHub Pages
+    - Test that all links work with base path
+    - _Requirements: 9.1, 9.2_
+  
+  - [x] 13.3 Write deployment documentation
+    - Create `DEPLOYMENT.md` with step-by-step GitHub Pages guide
+    - Document repository setup and configuration
+    - Document how to enable GitHub Pages
+    - Include custom domain setup instructions
+    - Add troubleshooting section
+    - Document update process for future changes
+    - _Requirements: 9.5_
+  
+  - [x] 13.4 Update README with deployment info
+    - Add GitHub Pages deployment section to README
+    - Document automated deployment workflow
+    - Add security features to README
+    - Update available npm scripts
+    - _Requirements: 9.5_
+
+- [x] 14. Add security and deployment tests
+  - [x] 14.1 Write unit tests for security configuration
+    - Test that `.gitleaks.toml` exists and is valid
+    - Test that `.env.example` exists and documents required variables
+    - Test that pre-commit hook is executable
+    - Test that `SECURITY.md` exists and contains required sections
+    - _Requirements: 8.1, 8.2, 8.3, 8.5_
+  
+  - [x] 14.2 Write unit tests for CI/CD configuration
+    - Test that `.github/workflows/deploy.yml` exists
+    - Test that workflow file is valid YAML
+    - Test that workflow contains required jobs (build, deploy)
+    - Test that `DEPLOYMENT.md` exists and contains required sections
+    - _Requirements: 9.1, 9.2, 9.4, 9.5_
+
+- [x] 15. Final verification
+  - Test pre-commit hook by attempting to commit a test secret
+  - Verify GitHub Actions workflow runs successfully
+  - Verify site deploys correctly to GitHub Pages
+  - Run all tests including new security and deployment tests
+  - Ensure all documentation is complete and accurate
+  - _Requirements: 8.1, 8.2, 8.3, 9.1, 9.2_

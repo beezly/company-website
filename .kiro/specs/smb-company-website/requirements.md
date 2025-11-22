@@ -13,6 +13,9 @@ This document specifies the requirements for a statically-hosted company website
 - **Configuration File**: A centralized file containing company information including the Company Name
 - **Build Process**: The compilation and generation of static files from source code
 - **Managed Services**: IT services provided to SMB clients including infrastructure management, support, and consulting
+- **Secret**: Sensitive information such as API keys, tokens, passwords, or credentials that must not be committed to version control
+- **CI/CD Pipeline**: Continuous Integration and Continuous Deployment automated workflow that builds and deploys the Website
+- **Environment Variable**: A configuration value stored outside the codebase, typically used for secrets and environment-specific settings
 
 ## Requirements
 
@@ -99,3 +102,27 @@ This document specifies the requirements for a statically-hosted company website
 3. THE README SHALL document how to run the Build Process locally
 4. THE README SHALL document how to deploy the Website to static hosting services
 5. THE README SHALL document the project structure and where to find key files
+
+### Requirement 8
+
+**User Story:** As a developer, I want automated secret detection, so that I do not accidentally commit API keys or sensitive credentials to version control.
+
+#### Acceptance Criteria
+
+1. WHEN a developer attempts to commit code containing Secrets, THE Website SHALL block the commit and display a warning message
+2. THE Website SHALL scan for common Secret patterns including API keys, tokens, private keys, and passwords
+3. THE Website SHALL provide a pre-commit hook that runs Secret detection automatically
+4. THE Website SHALL include a CI/CD pipeline that scans for Secrets on every push and pull request
+5. THE Website SHALL provide documentation on how to properly use Environment Variables for Secrets
+
+### Requirement 9
+
+**User Story:** As a developer, I want automated deployment to GitHub Pages, so that changes are published automatically without manual intervention.
+
+#### Acceptance Criteria
+
+1. WHEN code is pushed to the main branch, THE CI/CD Pipeline SHALL automatically build the Website
+2. WHEN the Build Process completes successfully, THE CI/CD Pipeline SHALL deploy the Website to GitHub Pages
+3. THE CI/CD Pipeline SHALL run all tests before deployment
+4. THE Website SHALL provide a GitHub Actions workflow configuration for automated deployment
+5. THE Website SHALL include documentation on how to configure and use GitHub Pages deployment

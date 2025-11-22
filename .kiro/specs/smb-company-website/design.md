@@ -14,11 +14,19 @@ The website will consist of four main pages (Home, Services, About, Contact) wit
 - **Styling**: Tailwind CSS - Utility-first CSS framework for responsive design
 - **Build Tool**: Vite (included with Astro) - Fast build tooling
 - **Deployment Target**: Static file hosting (Netlify, Vercel, GitHub Pages)
+- **Secret Detection**: Gitleaks - Automated secret scanning tool
+- **CI/CD**: GitHub Actions - Automated build, test, and deployment pipeline
+- **Git Hooks**: Husky - Pre-commit hook management
 
 ### Project Structure
 
 ```
 smb-company-website/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml         # GitHub Actions deployment workflow
+├── .husky/
+│   └── pre-commit             # Pre-commit hook for secret scanning
 ├── src/
 │   ├── components/
 │   │   ├── Header.astro       # Navigation header
@@ -32,10 +40,15 @@ smb-company-website/
 │   └── config.ts              # Configuration file with company info
 ├── public/
 │   └── images/                # Static images
+├── tests/                     # Test files
+├── .env.example               # Environment variable template
+├── .gitleaks.toml             # Gitleaks configuration
 ├── astro.config.mjs           # Astro configuration
 ├── tailwind.config.mjs        # Tailwind configuration
 ├── package.json
-└── README.md
+├── README.md
+├── SECURITY.md                # Security documentation
+└── DEPLOYMENT.md              # Deployment guide
 ```
 
 ## Components and Interfaces
@@ -185,6 +198,95 @@ The following properties represent the unique, non-redundant correctness require
 *For any* image in the website, the image should have responsive CSS properties or attributes
 **Validates: Requirements 5.4**
 
+### Property 7: Secret detection in pre-commit hook
+*For any* commit attempt containing common secret patterns, the pre-commit hook should block the commit and display a warning
+**Validates: Requirements 8.1, 8.2, 8.3**
+
+### Property 8: GitHub Actions workflow validity
+*For any* push to the main branch, the GitHub Actions workflow should execute successfully and deploy the site
+**Validates: Requirements 9.1, 9.2, 9.4**
+
+## Security Architecture
+
+### Secret Detection System
+
+The website implements a multi-layered approach to prevent accidental exposure of sensitive information:
+
+**Layer 1: Pre-commit Hook**
+- Husky manages Git hooks
+- Gitleaks scans staged files before each commit
+- Blocks commits containing detected secrets
+- Provides helpful error messages with remediation steps
+
+**Layer 2: CI/CD Scanning**
+- GitHub Actions runs Gitleaks on every push and pull request
+- Catches secrets that bypass local checks
+- Scans entire repository history
+- Fails the build if secrets are detected
+
+**Layer 3: Manual Scanning**
+- `npm run security:scan` - Scan entire repository
+- `npm run security:protect` - Scan staged files on demand
+
+### Secret Detection Patterns
+
+Gitleaks is configured to detect:
+- Generic API keys (20+ character alphanumeric strings with key/secret keywords)
+- AWS access keys (AKIA...)
+- Stripe API keys (sk_live_..., pk_test_...)
+- GitHub tokens (ghp_...)
+- Google API keys (AIza...)
+- Slack tokens (xoxb-...)
+- Private keys (-----BEGIN ... PRIVATE KEY-----)
+- Database connection strings
+
+### Environment Variable Management
+
+**Configuration:**
+- `.env` file stores actual secrets (gitignored)
+- `.env.example` documents required variables (committed)
+- Astro's `import.meta.env` provides access to environment variables
+- Variables prefixed with `PUBLIC_` are exposed to client-side code
+
+**Best Practices:**
+- Never hardcode secrets in source code
+- Use environment variables for all sensitive data
+- Document all required variables in `.env.example`
+- Rotate secrets immediately if accidentally committed
+
+## CI/CD Pipeline
+
+### GitHub Actions Workflow
+
+**Trigger Events:**
+- Push to main branch
+- Manual workflow dispatch
+
+**Build Job:**
+1. Checkout code
+2. Setup Node.js 20
+3. Install dependencies (`npm ci`)
+4. Run build (`npm run build`)
+5. Upload build artifacts
+
+**Deploy Job:**
+1. Deploy to GitHub Pages
+2. Set deployment URL
+3. Requires build job to complete successfully
+
+**Permissions:**
+- `contents: read` - Read repository contents
+- `pages: write` - Deploy to GitHub Pages
+- `id-token: write` - OIDC token for deployment
+
+### Deployment Process
+
+1. Developer pushes code to main branch
+2. GitHub Actions triggers automatically
+3. Build job runs tests and builds site
+4. If successful, deploy job publishes to GitHub Pages
+5. Site is live at configured URL within 1-2 minutes
+
 ## Error Handling
 
 ### Build-Time Errors
@@ -193,6 +295,7 @@ The following properties represent the unique, non-redundant correctness require
 2. **Invalid Configuration Values**: If required configuration fields are empty or invalid, the build should fail with validation errors
 3. **Missing Assets**: If referenced images or assets are missing, the build should warn or fail depending on severity
 4. **Invalid HTML**: If generated HTML is malformed, the build should fail with validation errors
+5. **Secret Detection**: If secrets are detected during commit or CI/CD, the process should fail with detailed information about the detected secret
 
 ### Runtime Errors
 
@@ -201,6 +304,12 @@ Since this is a static website with minimal JavaScript:
 1. **Navigation Errors**: If a navigation link points to a non-existent page, users should see a 404 page (provided by hosting service)
 2. **Asset Loading Errors**: If images fail to load, alt text should be displayed
 3. **Form Submission**: Contact form should handle submission errors gracefully (if implemented with a form service)
+
+### Security Errors
+
+1. **Commit Blocked**: If pre-commit hook detects secrets, provide clear instructions on how to use environment variables
+2. **CI/CD Failure**: If GitHub Actions detects secrets, fail the build and notify developers
+3. **False Positives**: Allow developers to configure allowlist in `.gitleaks.toml` for legitimate patterns
 
 ## Testing Strategy
 
@@ -214,7 +323,10 @@ Unit tests will verify specific functionality and edge cases:
 4. **File Existence**: Test that all required pages (index, services, about, contact) exist in build output
 5. **Static File Validation**: Test that build output contains only static files (HTML, CSS, JS, images)
 6. **Performance**: Test that total bundle size (excluding images) is under 500KB
-7. **Documentation**: Test that README.md exists and contains required sections
+7. **Documentation**: Test that README.md, SECURITY.md, and DEPLOYMENT.md exist and contain required sections
+8. **Security Configuration**: Test that `.gitleaks.toml` exists and contains required secret detection rules
+9. **CI/CD Configuration**: Test that `.github/workflows/deploy.yml` exists and is valid YAML
+10. **Environment Variables**: Test that `.env.example` exists and documents required variables
 
 ### Property-Based Testing
 
@@ -233,6 +345,8 @@ Property-based tests will verify:
 4. **Property 4 - Heading Hierarchy**: For any generated page, verify heading structure follows proper hierarchy
 5. **Property 5 - Image Alt Text**: For any generated page, verify all img tags have non-empty alt attributes
 6. **Property 6 - Responsive Images**: For any generated page, verify all images have responsive styling
+7. **Property 7 - Secret Detection**: For any common secret pattern, verify the pre-commit hook blocks commits containing that pattern
+8. **Property 8 - Workflow Validity**: For any valid push event, verify the GitHub Actions workflow configuration is syntactically correct and contains required jobs
 
 ### Testing Approach
 
@@ -248,14 +362,18 @@ tests/
 ├── unit/
 │   ├── config.test.ts         # Configuration loading tests
 │   ├── build.test.ts          # Build output tests
-│   └── performance.test.ts    # Bundle size tests
-└── properties/
-    ├── company-name.test.ts   # Property 1: Company name consistency
-    ├── semantic-html.test.ts  # Property 2: Semantic HTML
-    ├── meta-tags.test.ts      # Property 3: Meta tag completeness
-    ├── headings.test.ts       # Property 4: Heading hierarchy
-    ├── images.test.ts         # Properties 5 & 6: Image accessibility and responsiveness
-    └── test-utils.ts          # Shared utilities for parsing HTML
+│   ├── performance.test.ts    # Bundle size tests
+│   ├── security.test.ts       # Security configuration tests
+│   └── documentation.test.ts  # Documentation completeness tests
+├── properties/
+│   ├── company-name.test.ts   # Property 1: Company name consistency
+│   ├── semantic-html.test.ts  # Property 2: Semantic HTML
+│   ├── meta-tags.test.ts      # Property 3: Meta tag completeness
+│   ├── headings.test.ts       # Property 4: Heading hierarchy
+│   ├── images.test.ts         # Properties 5 & 6: Image accessibility and responsiveness
+│   └── security.test.ts       # Properties 7 & 8: Secret detection and workflow validity
+└── utils/
+    └── html-validators.ts     # Shared utilities for parsing HTML
 ```
 
 ## Deployment
@@ -266,20 +384,39 @@ tests/
 2. Output will be in the `dist/` directory
 3. All pages, assets, and configuration will be compiled into static files
 
-### Hosting Options
+### Automated Deployment (GitHub Pages)
 
-The website can be deployed to any static hosting service:
+**Primary deployment method using GitHub Actions:**
+
+1. **Configuration**:
+   - Update `astro.config.mjs` with site URL and base path
+   - Enable GitHub Pages in repository settings
+   - Select "GitHub Actions" as deployment source
+
+2. **Workflow**:
+   - Defined in `.github/workflows/deploy.yml`
+   - Triggers on push to main branch
+   - Runs build and test suite
+   - Deploys to GitHub Pages automatically
+
+3. **Access**:
+   - Site available at `https://USERNAME.github.io/REPO-NAME/`
+   - Custom domain support via CNAME file in `public/` directory
+
+### Manual Deployment Options
+
+The website can also be deployed to other static hosting services:
 
 1. **Netlify**: Connect repository and configure build command (`npm run build`) and publish directory (`dist`)
 2. **Vercel**: Similar to Netlify, auto-detects Astro projects
-3. **GitHub Pages**: Push `dist/` directory to `gh-pages` branch or configure GitHub Actions
-4. **AWS S3 + CloudFront**: Upload `dist/` contents to S3 bucket configured for static hosting
+3. **AWS S3 + CloudFront**: Upload `dist/` contents to S3 bucket configured for static hosting
 
 ### Configuration for Deployment
 
 - Ensure `astro.config.mjs` has correct `site` and `base` settings for the deployment URL
 - Update `siteConfig` in `src/config.ts` with production values before deployment
 - Verify all links are relative or use the configured base path
+- Set environment variables in hosting platform (GitHub Secrets, Netlify environment variables, etc.)
 
 ## Performance Considerations
 
