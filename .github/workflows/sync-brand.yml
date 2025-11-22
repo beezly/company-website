@@ -1,11 +1,7 @@
 name: Sync Brand Standards
 
-on:
-  workflow_dispatch:  # Manual trigger - run when you want to check for brand updates
-  
-  # Optional: Run weekly to check for updates (commented out by default)
-  # schedule:
-  #   - cron: '0 9 * * 1'  # Every Monday at 9 AM UTC
+# Manual trigger - run when you want to check for brand updates
+on: workflow_dispatch
 
 permissions:
   contents: write
