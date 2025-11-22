@@ -26,14 +26,17 @@ jobs:
         with:
           node-version: '20'
       
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
       
       - name: Check brand version
         id: check-version
         run: |
+          # Install jq
+          sudo apt-get update && sudo apt-get install -y jq
+          
           # Get current brand version from config
           CURRENT_VERSION=$(grep -o '"version": "[^"]*"' src/config.ts | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' | head -1)
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
@@ -53,173 +56,200 @@ jobs:
             echo "✅ Brand is up to date"
           fi
       
-      - name: Create sync script
+      - name: Sync brand standards
         if: steps.check-version.outputs.needs_update == 'true'
         run: |
-          cat > sync-brand.sh << 'SCRIPT_EOF'
-          #!/bin/bash
-          set -e
+          python3 << 'PYTHON_SCRIPT'
+          import json
+          import re
+          from datetime import date
           
-          BRAND_JSON="brand-repo/brand-standards/brand.json"
-          LATEST_VERSION="$1"
+          # Load brand JSON
+          with open('brand-repo/brand-standards/brand.json', 'r') as f:
+              brand = json.load(f)
           
-          echo "Syncing to version $LATEST_VERSION..."
-          
-          # Extract company name
-          COMPANY_NAME=$(jq -r '.metadata.companyName' "$BRAND_JSON")
+          version = "${{ steps.check-version.outputs.latest_version }}"
+          today = date.today().strftime('%Y-%m-%d')
+          company_name = brand['metadata']['companyName']
           
           # Update src/config.ts
-          sed -i "s/version: \"[^\"]*\"/version: \"$LATEST_VERSION\"/" src/config.ts
-          sed -i "s/companyName: \"[^\"]*\"/companyName: \"$COMPANY_NAME\"/" src/config.ts
-          sed -i "s/Brand Standards Version: [0-9.]\+/Brand Standards Version: $LATEST_VERSION/" src/config.ts
-          sed -i "s/Last Synced: [0-9-]\+/Last Synced: $(date +%Y-%m-%d)/" src/config.ts
+          with open('src/config.ts', 'r') as f:
+              config = f.read()
           
-          # Function to update brand-colors.ts
-          update_color() {
-            local color_key=$1
-            local var_prefix=$2
-            
-            local name=$(jq -r ".colors.$color_key.name" "$BRAND_JSON")
-            local hex=$(jq -r ".colors.$color_key.hex" "$BRAND_JSON")
-            local r=$(jq -r ".colors.$color_key.rgb[0]" "$BRAND_JSON")
-            local g=$(jq -r ".colors.$color_key.rgb[1]" "$BRAND_JSON")
-            local b=$(jq -r ".colors.$color_key.rgb[2]" "$BRAND_JSON")
-            local usage=$(jq -r ".colors.$color_key.usage" "$BRAND_JSON")
-            
-            sed -i "s/${var_prefix}_NAME/$name/" src/brand-colors.ts
-            sed -i "s/${var_prefix}_HEX/$hex/" src/brand-colors.ts
-            sed -i "s/${var_prefix}_R/$r/" src/brand-colors.ts
-            sed -i "s/${var_prefix}_G/$g/" src/brand-colors.ts
-            sed -i "s/${var_prefix}_B/$b/" src/brand-colors.ts
-            sed -i "s/${var_prefix}_USAGE/$usage/" src/brand-colors.ts
-          }
+          config = re.sub(r'version: "[^"]*"', f'version: "{version}"', config)
+          config = re.sub(r'companyName: "[^"]*"', f'companyName: "{company_name}"', config)
+          config = re.sub(r'Brand Standards Version: [0-9.]+', f'Brand Standards Version: {version}', config)
+          config = re.sub(r'Last Synced: [0-9-]+', f'Last Synced: {today}', config)
           
-          # Create brand-colors.ts template
-          cp src/brand-colors.ts src/brand-colors.ts.bak
+          with open('src/config.ts', 'w') as f:
+              f.write(config)
           
-          cat > src/brand-colors.ts << 'EOF'
-/**
+          # Generate brand-colors.ts
+          colors_template = '''/**
  * Brand Colors
  * 
  * Synchronized with Project Rhubarb brand standards
  * Source: https://github.com/beezly/company-branding
- * Brand Version: BRAND_VERSION_PLACEHOLDER
+ * Brand Version: {version}
  * 
  * DO NOT modify these values directly. All brand colors should be updated
  * in the company-branding repository and synced here.
  */
 
-export const brandColors = {
-  primary: {
-    name: "PRIMARY_NAME",
-    hex: "PRIMARY_HEX",
-    rgb: [PRIMARY_R, PRIMARY_G, PRIMARY_B] as const,
-    usage: "PRIMARY_USAGE"
-  },
-  secondary: {
-    name: "SECONDARY_NAME",
-    hex: "SECONDARY_HEX",
-    rgb: [SECONDARY_R, SECONDARY_G, SECONDARY_B] as const,
-    usage: "SECONDARY_USAGE"
-  },
-  neutralDark: {
-    name: "NEUTRAL_DARK_NAME",
-    hex: "NEUTRAL_DARK_HEX",
-    rgb: [NEUTRAL_DARK_R, NEUTRAL_DARK_G, NEUTRAL_DARK_B] as const,
-    usage: "NEUTRAL_DARK_USAGE"
-  },
-  neutralMedium: {
-    name: "NEUTRAL_MEDIUM_NAME",
-    hex: "NEUTRAL_MEDIUM_HEX",
-    rgb: [NEUTRAL_MEDIUM_R, NEUTRAL_MEDIUM_G, NEUTRAL_MEDIUM_B] as const,
-    usage: "NEUTRAL_MEDIUM_USAGE"
-  },
-  neutralLight: {
-    name: "NEUTRAL_LIGHT_NAME",
-    hex: "NEUTRAL_LIGHT_HEX",
-    rgb: [NEUTRAL_LIGHT_R, NEUTRAL_LIGHT_G, NEUTRAL_LIGHT_B] as const,
-    usage: "NEUTRAL_LIGHT_USAGE"
-  },
-  success: {
-    name: "SUCCESS_NAME",
-    hex: "SUCCESS_HEX",
-    rgb: [SUCCESS_R, SUCCESS_G, SUCCESS_B] as const,
-    usage: "SUCCESS_USAGE"
-  },
-  warning: {
-    name: "WARNING_NAME",
-    hex: "WARNING_HEX",
-    rgb: [WARNING_R, WARNING_G, WARNING_B] as const,
-    usage: "WARNING_USAGE"
-  },
-  error: {
-    name: "ERROR_NAME",
-    hex: "ERROR_HEX",
-    rgb: [ERROR_R, ERROR_G, ERROR_B] as const,
-    usage: "ERROR_USAGE"
-  },
-  white: {
-    name: "WHITE_NAME",
-    hex: "WHITE_HEX",
-    rgb: [WHITE_R, WHITE_G, WHITE_B] as const,
-    usage: "WHITE_USAGE"
-  }
-} as const;
+export const brandColors = {{
+  primary: {{
+    name: "{primary_name}",
+    hex: "{primary_hex}",
+    rgb: [{primary_r}, {primary_g}, {primary_b}] as const,
+    usage: "{primary_usage}"
+  }},
+  secondary: {{
+    name: "{secondary_name}",
+    hex: "{secondary_hex}",
+    rgb: [{secondary_r}, {secondary_g}, {secondary_b}] as const,
+    usage: "{secondary_usage}"
+  }},
+  neutralDark: {{
+    name: "{neutral_dark_name}",
+    hex: "{neutral_dark_hex}",
+    rgb: [{neutral_dark_r}, {neutral_dark_g}, {neutral_dark_b}] as const,
+    usage: "{neutral_dark_usage}"
+  }},
+  neutralMedium: {{
+    name: "{neutral_medium_name}",
+    hex: "{neutral_medium_hex}",
+    rgb: [{neutral_medium_r}, {neutral_medium_g}, {neutral_medium_b}] as const,
+    usage: "{neutral_medium_usage}"
+  }},
+  neutralLight: {{
+    name: "{neutral_light_name}",
+    hex: "{neutral_light_hex}",
+    rgb: [{neutral_light_r}, {neutral_light_g}, {neutral_light_b}] as const,
+    usage: "{neutral_light_usage}"
+  }},
+  success: {{
+    name: "{success_name}",
+    hex: "{success_hex}",
+    rgb: [{success_r}, {success_g}, {success_b}] as const,
+    usage: "{success_usage}"
+  }},
+  warning: {{
+    name: "{warning_name}",
+    hex: "{warning_hex}",
+    rgb: [{warning_r}, {warning_g}, {warning_b}] as const,
+    usage: "{warning_usage}"
+  }},
+  error: {{
+    name: "{error_name}",
+    hex: "{error_hex}",
+    rgb: [{error_r}, {error_g}, {error_b}] as const,
+    usage: "{error_usage}"
+  }},
+  white: {{
+    name: "{white_name}",
+    hex: "{white_hex}",
+    rgb: [{white_r}, {white_g}, {white_b}] as const,
+    usage: "{white_usage}"
+  }}
+}} as const;
 
 export type BrandColor = keyof typeof brandColors;
-EOF
+'''
           
-          # Update version placeholder
-          sed -i "s/BRAND_VERSION_PLACEHOLDER/$LATEST_VERSION/" src/brand-colors.ts
+          # Fill in color values
+          colors = brand['colors']
+          colors_content = colors_template.format(
+              version=version,
+              primary_name=colors['primary']['name'],
+              primary_hex=colors['primary']['hex'],
+              primary_r=colors['primary']['rgb'][0],
+              primary_g=colors['primary']['rgb'][1],
+              primary_b=colors['primary']['rgb'][2],
+              primary_usage=colors['primary']['usage'],
+              secondary_name=colors['secondary']['name'],
+              secondary_hex=colors['secondary']['hex'],
+              secondary_r=colors['secondary']['rgb'][0],
+              secondary_g=colors['secondary']['rgb'][1],
+              secondary_b=colors['secondary']['rgb'][2],
+              secondary_usage=colors['secondary']['usage'],
+              neutral_dark_name=colors['neutral_dark']['name'],
+              neutral_dark_hex=colors['neutral_dark']['hex'],
+              neutral_dark_r=colors['neutral_dark']['rgb'][0],
+              neutral_dark_g=colors['neutral_dark']['rgb'][1],
+              neutral_dark_b=colors['neutral_dark']['rgb'][2],
+              neutral_dark_usage=colors['neutral_dark']['usage'],
+              neutral_medium_name=colors['neutral_medium']['name'],
+              neutral_medium_hex=colors['neutral_medium']['hex'],
+              neutral_medium_r=colors['neutral_medium']['rgb'][0],
+              neutral_medium_g=colors['neutral_medium']['rgb'][1],
+              neutral_medium_b=colors['neutral_medium']['rgb'][2],
+              neutral_medium_usage=colors['neutral_medium']['usage'],
+              neutral_light_name=colors['neutral_light']['name'],
+              neutral_light_hex=colors['neutral_light']['hex'],
+              neutral_light_r=colors['neutral_light']['rgb'][0],
+              neutral_light_g=colors['neutral_light']['rgb'][1],
+              neutral_light_b=colors['neutral_light']['rgb'][2],
+              neutral_light_usage=colors['neutral_light']['usage'],
+              success_name=colors['success']['name'],
+              success_hex=colors['success']['hex'],
+              success_r=colors['success']['rgb'][0],
+              success_g=colors['success']['rgb'][1],
+              success_b=colors['success']['rgb'][2],
+              success_usage=colors['success']['usage'],
+              warning_name=colors['warning']['name'],
+              warning_hex=colors['warning']['hex'],
+              warning_r=colors['warning']['rgb'][0],
+              warning_g=colors['warning']['rgb'][1],
+              warning_b=colors['warning']['rgb'][2],
+              warning_usage=colors['warning']['usage'],
+              error_name=colors['error']['name'],
+              error_hex=colors['error']['hex'],
+              error_r=colors['error']['rgb'][0],
+              error_g=colors['error']['rgb'][1],
+              error_b=colors['error']['rgb'][2],
+              error_usage=colors['error']['usage'],
+              white_name=colors['white']['name'],
+              white_hex=colors['white']['hex'],
+              white_r=colors['white']['rgb'][0],
+              white_g=colors['white']['rgb'][1],
+              white_b=colors['white']['rgb'][2],
+              white_usage=colors['white']['usage']
+          )
           
-          # Update all colors
-          update_color "primary" "PRIMARY"
-          update_color "secondary" "SECONDARY"
-          update_color "neutral_dark" "NEUTRAL_DARK"
-          update_color "neutral_medium" "NEUTRAL_MEDIUM"
-          update_color "neutral_light" "NEUTRAL_LIGHT"
-          update_color "success" "SUCCESS"
-          update_color "warning" "WARNING"
-          update_color "error" "ERROR"
-          update_color "white" "WHITE"
+          with open('src/brand-colors.ts', 'w') as f:
+              f.write(colors_content)
           
           # Update CSS variables in global.css
-          PRIMARY_HEX=$(jq -r '.colors.primary.hex' "$BRAND_JSON")
-          SECONDARY_HEX=$(jq -r '.colors.secondary.hex' "$BRAND_JSON")
-          NEUTRAL_DARK_HEX=$(jq -r '.colors.neutral_dark.hex' "$BRAND_JSON")
-          NEUTRAL_MEDIUM_HEX=$(jq -r '.colors.neutral_medium.hex' "$BRAND_JSON")
-          NEUTRAL_LIGHT_HEX=$(jq -r '.colors.neutral_light.hex' "$BRAND_JSON")
-          SUCCESS_HEX=$(jq -r '.colors.success.hex' "$BRAND_JSON")
-          WARNING_HEX=$(jq -r '.colors.warning.hex' "$BRAND_JSON")
-          ERROR_HEX=$(jq -r '.colors.error.hex' "$BRAND_JSON")
-          WHITE_HEX=$(jq -r '.colors.white.hex' "$BRAND_JSON")
+          with open('src/styles/global.css', 'r') as f:
+              css = f.read()
           
-          sed -i "s/--color-brand-primary: #[0-9A-Fa-f]\{6\}/--color-brand-primary: $PRIMARY_HEX/" src/styles/global.css
-          sed -i "s/--color-brand-secondary: #[0-9A-Fa-f]\{6\}/--color-brand-secondary: $SECONDARY_HEX/" src/styles/global.css
-          sed -i "s/--color-neutral-dark: #[0-9A-Fa-f]\{6\}/--color-neutral-dark: $NEUTRAL_DARK_HEX/" src/styles/global.css
-          sed -i "s/--color-neutral-medium: #[0-9A-Fa-f]\{6\}/--color-neutral-medium: $NEUTRAL_MEDIUM_HEX/" src/styles/global.css
-          sed -i "s/--color-neutral-light: #[0-9A-Fa-f]\{6\}/--color-neutral-light: $NEUTRAL_LIGHT_HEX/" src/styles/global.css
-          sed -i "s/--color-success: #[0-9A-Fa-f]\{6\}/--color-success: $SUCCESS_HEX/" src/styles/global.css
-          sed -i "s/--color-warning: #[0-9A-Fa-f]\{6\}/--color-warning: $WARNING_HEX/" src/styles/global.css
-          sed -i "s/--color-error: #[0-9A-Fa-f]\{6\}/--color-error: $ERROR_HEX/" src/styles/global.css
-          sed -i "s/--color-white: #[0-9A-Fa-f]\{6\}/--color-white: $WHITE_HEX/" src/styles/global.css
+          css = re.sub(r'--color-brand-primary: #[0-9A-Fa-f]{6}', f'--color-brand-primary: {colors["primary"]["hex"]}', css)
+          css = re.sub(r'--color-brand-secondary: #[0-9A-Fa-f]{6}', f'--color-brand-secondary: {colors["secondary"]["hex"]}', css)
+          css = re.sub(r'--color-neutral-dark: #[0-9A-Fa-f]{6}', f'--color-neutral-dark: {colors["neutral_dark"]["hex"]}', css)
+          css = re.sub(r'--color-neutral-medium: #[0-9A-Fa-f]{6}', f'--color-neutral-medium: {colors["neutral_medium"]["hex"]}', css)
+          css = re.sub(r'--color-neutral-light: #[0-9A-Fa-f]{6}', f'--color-neutral-light: {colors["neutral_light"]["hex"]}', css)
+          css = re.sub(r'--color-success: #[0-9A-Fa-f]{6}', f'--color-success: {colors["success"]["hex"]}', css)
+          css = re.sub(r'--color-warning: #[0-9A-Fa-f]{6}', f'--color-warning: {colors["warning"]["hex"]}', css)
+          css = re.sub(r'--color-error: #[0-9A-Fa-f]{6}', f'--color-error: {colors["error"]["hex"]}', css)
+          css = re.sub(r'--color-white: #[0-9A-Fa-f]{6}', f'--color-white: {colors["white"]["hex"]}', css)
+          css = re.sub(r'Version: [0-9.]+', f'Version: {version}', css)
+          css = re.sub(r'Last Synced: [0-9-]+', f'Last Synced: {today}', css)
           
-          sed -i "s/Version: [0-9.]\+/Version: $LATEST_VERSION/" src/styles/global.css
-          sed -i "s/Last Synced: [0-9-]\+/Last Synced: $(date +%Y-%m-%d)/" src/styles/global.css
+          with open('src/styles/global.css', 'w') as f:
+              f.write(css)
           
           # Update BRANDING.md
-          sed -i "s/\*\*Current Version\*\*: [0-9.]\+/**Current Version**: $LATEST_VERSION/" BRANDING.md
-          sed -i "s/\*\*Last Synced\*\*: [0-9-]\+/**Last Synced**: $(date +%Y-%m-%d)/" BRANDING.md
+          with open('BRANDING.md', 'r') as f:
+              branding = f.read()
           
-          echo "✅ Brand standards synced to version $LATEST_VERSION"
-          SCRIPT_EOF
+          branding = re.sub(r'\*\*Current Version\*\*: [0-9.]+', f'**Current Version**: {version}', branding)
+          branding = re.sub(r'\*\*Last Synced\*\*: [0-9-]+', f'**Last Synced**: {today}', branding)
           
-          chmod +x sync-brand.sh
-      
-      - name: Run sync script
-        if: steps.check-version.outputs.needs_update == 'true'
-        run: |
-          ./sync-brand.sh "${{ steps.check-version.outputs.latest_version }}"
+          with open('BRANDING.md', 'w') as f:
+              f.write(branding)
+          
+          print(f"✅ Brand standards synced to version {version}")
+          PYTHON_SCRIPT
       
       - name: Create Pull Request
         if: steps.check-version.outputs.needs_update == 'true'
