@@ -41,7 +41,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y jq
           
           # Get current brand version from config
-          CURRENT_VERSION=$(grep -o '"version": "[^"]*"' src/config.ts | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' | head -1)
+          CURRENT_VERSION=$(grep -o 'version: "[^"]*"' src/config.ts | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' | head -1)
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           
           # Get latest brand version from brand repo
