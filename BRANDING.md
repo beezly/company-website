@@ -75,7 +75,27 @@ Based on 8px base unit system:
 
 ## Synchronizing Brand Updates
 
-When the brand standards repository is updated:
+### Automated Sync (Recommended)
+
+The easiest way to sync brand updates is using the automated GitHub Action:
+
+1. **Go to Actions tab** in your GitHub repository
+2. **Select "Sync Brand Standards"** workflow
+3. **Click "Run workflow"** button
+4. **Select the main branch** and click "Run workflow"
+
+The workflow will:
+- ✅ Check the brand repository for updates
+- ✅ Compare current version with latest version
+- ✅ Automatically update all brand files if needed
+- ✅ Create a Pull Request with the changes
+- ✅ Include a detailed summary of what changed
+
+**Review the PR**, test if needed, then merge to deploy the updated branding.
+
+### Manual Sync (Alternative)
+
+If you prefer to sync manually:
 
 ### 1. Check for Updates
 

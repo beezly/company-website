@@ -1,0 +1,305 @@
+name: Sync Brand Standards
+
+on:
+  # Manual trigger - run when you want to check for brand updates
+  workflow_dispatch:
+  
+  # Optional: Run weekly to check for updates (commented out by default)
+  # schedule:
+  #   - cron: '0 9 * * 1'  # Every Monday at 9 AM UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-brand:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout website repository
+        uses: actions/checkout@v4
+      
+      - name: Checkout brand repository
+        uses: actions/checkout@v4
+        with:
+          repository: beezly/company-branding
+          path: brand-repo
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Check brand version
+        id: check-version
+        run: |
+          # Get current brand version from config
+          CURRENT_VERSION=$(grep -o '"version": "[^"]*"' src/config.ts | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' | head -1)
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          
+          # Get latest brand version from brand repo
+          LATEST_VERSION=$(grep -o '"version": "[^"]*"' brand-repo/brand-standards/brand.json | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' | head -1)
+          echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          
+          echo "Current brand version: $CURRENT_VERSION"
+          echo "Latest brand version: $LATEST_VERSION"
+          
+          if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+            echo "✨ Brand update available: $CURRENT_VERSION → $LATEST_VERSION"
+          else
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+            echo "✅ Brand is up to date"
+          fi
+      
+      - name: Sync brand standards
+        if: steps.check-version.outputs.needs_update == 'true'
+        run: |
+          # Install jq for JSON parsing
+          sudo apt-get update && sudo apt-get install -y jq
+          
+          BRAND_JSON="brand-repo/brand-standards/brand.json"
+          LATEST_VERSION="${{ steps.check-version.outputs.latest_version }}"
+          
+          # Extract brand data
+          COMPANY_NAME=$(jq -r '.metadata.companyName' "$BRAND_JSON")
+          
+          # Update src/config.ts
+          sed -i "s/version: \"[^\"]*\"/version: \"$LATEST_VERSION\"/" src/config.ts
+          sed -i "s/companyName: \"[^\"]*\"/companyName: \"$COMPANY_NAME\"/" src/config.ts
+          sed -i "s/Brand Standards Version: [0-9.]\+/Brand Standards Version: $LATEST_VERSION/" src/config.ts
+          sed -i "s/Last Synced: [0-9-]\+/Last Synced: $(date +%Y-%m-%d)/" src/config.ts
+          
+          # Update src/brand-colors.ts
+          echo "Updating brand colors..."
+          cat > src/brand-colors.ts << 'EOF'
+/**
+ * Brand Colors
+ * 
+ * Synchronized with Project Rhubarb brand standards
+ * Source: https://github.com/beezly/company-branding
+ * Brand Version: BRAND_VERSION_PLACEHOLDER
+ * 
+ * DO NOT modify these values directly. All brand colors should be updated
+ * in the company-branding repository and synced here.
+ */
+
+export const brandColors = {
+  primary: {
+    name: "PRIMARY_NAME",
+    hex: "PRIMARY_HEX",
+    rgb: [PRIMARY_R, PRIMARY_G, PRIMARY_B] as const,
+    usage: "PRIMARY_USAGE"
+  },
+  secondary: {
+    name: "SECONDARY_NAME",
+    hex: "SECONDARY_HEX",
+    rgb: [SECONDARY_R, SECONDARY_G, SECONDARY_B] as const,
+    usage: "SECONDARY_USAGE"
+  },
+  neutralDark: {
+    name: "NEUTRAL_DARK_NAME",
+    hex: "NEUTRAL_DARK_HEX",
+    rgb: [NEUTRAL_DARK_R, NEUTRAL_DARK_G, NEUTRAL_DARK_B] as const,
+    usage: "NEUTRAL_DARK_USAGE"
+  },
+  neutralMedium: {
+    name: "NEUTRAL_MEDIUM_NAME",
+    hex: "NEUTRAL_MEDIUM_HEX",
+    rgb: [NEUTRAL_MEDIUM_R, NEUTRAL_MEDIUM_G, NEUTRAL_MEDIUM_B] as const,
+    usage: "NEUTRAL_MEDIUM_USAGE"
+  },
+  neutralLight: {
+    name: "NEUTRAL_LIGHT_NAME",
+    hex: "NEUTRAL_LIGHT_HEX",
+    rgb: [NEUTRAL_LIGHT_R, NEUTRAL_LIGHT_G, NEUTRAL_LIGHT_B] as const,
+    usage: "NEUTRAL_LIGHT_USAGE"
+  },
+  success: {
+    name: "SUCCESS_NAME",
+    hex: "SUCCESS_HEX",
+    rgb: [SUCCESS_R, SUCCESS_G, SUCCESS_B] as const,
+    usage: "SUCCESS_USAGE"
+  },
+  warning: {
+    name: "WARNING_NAME",
+    hex: "WARNING_HEX",
+    rgb: [WARNING_R, WARNING_G, WARNING_B] as const,
+    usage: "WARNING_USAGE"
+  },
+  error: {
+    name: "ERROR_NAME",
+    hex: "ERROR_HEX",
+    rgb: [ERROR_R, ERROR_G, ERROR_B] as const,
+    usage: "ERROR_USAGE"
+  },
+  white: {
+    name: "WHITE_NAME",
+    hex: "WHITE_HEX",
+    rgb: [WHITE_R, WHITE_G, WHITE_B] as const,
+    usage: "WHITE_USAGE"
+  }
+} as const;
+
+export type BrandColor = keyof typeof brandColors;
+EOF
+          
+          # Replace placeholders with actual values from brand.json
+          sed -i "s/BRAND_VERSION_PLACEHOLDER/$LATEST_VERSION/" src/brand-colors.ts
+          
+          # Primary color
+          sed -i "s/PRIMARY_NAME/$(jq -r '.colors.primary.name' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/PRIMARY_HEX/$(jq -r '.colors.primary.hex' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/PRIMARY_R/$(jq -r '.colors.primary.rgb[0]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/PRIMARY_G/$(jq -r '.colors.primary.rgb[1]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/PRIMARY_B/$(jq -r '.colors.primary.rgb[2]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/PRIMARY_USAGE/$(jq -r '.colors.primary.usage' "$BRAND_JSON")/" src/brand-colors.ts
+          
+          # Secondary color
+          sed -i "s/SECONDARY_NAME/$(jq -r '.colors.secondary.name' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/SECONDARY_HEX/$(jq -r '.colors.secondary.hex' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/SECONDARY_R/$(jq -r '.colors.secondary.rgb[0]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/SECONDARY_G/$(jq -r '.colors.secondary.rgb[1]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/SECONDARY_B/$(jq -r '.colors.secondary.rgb[2]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/SECONDARY_USAGE/$(jq -r '.colors.secondary.usage' "$BRAND_JSON")/" src/brand-colors.ts
+          
+          # Neutral dark
+          sed -i "s/NEUTRAL_DARK_NAME/$(jq -r '.colors.neutral_dark.name' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_DARK_HEX/$(jq -r '.colors.neutral_dark.hex' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_DARK_R/$(jq -r '.colors.neutral_dark.rgb[0]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_DARK_G/$(jq -r '.colors.neutral_dark.rgb[1]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_DARK_B/$(jq -r '.colors.neutral_dark.rgb[2]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_DARK_USAGE/$(jq -r '.colors.neutral_dark.usage' "$BRAND_JSON")/" src/brand-colors.ts
+          
+          # Neutral medium
+          sed -i "s/NEUTRAL_MEDIUM_NAME/$(jq -r '.colors.neutral_medium.name' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_MEDIUM_HEX/$(jq -r '.colors.neutral_medium.hex' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_MEDIUM_R/$(jq -r '.colors.neutral_medium.rgb[0]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_MEDIUM_G/$(jq -r '.colors.neutral_medium.rgb[1]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_MEDIUM_B/$(jq -r '.colors.neutral_medium.rgb[2]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_MEDIUM_USAGE/$(jq -r '.colors.neutral_medium.usage' "$BRAND_JSON")/" src/brand-colors.ts
+          
+          # Neutral light
+          sed -i "s/NEUTRAL_LIGHT_NAME/$(jq -r '.colors.neutral_light.name' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_LIGHT_HEX/$(jq -r '.colors.neutral_light.hex' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_LIGHT_R/$(jq -r '.colors.neutral_light.rgb[0]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_LIGHT_G/$(jq -r '.colors.neutral_light.rgb[1]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_LIGHT_B/$(jq -r '.colors.neutral_light.rgb[2]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/NEUTRAL_LIGHT_USAGE/$(jq -r '.colors.neutral_light.usage' "$BRAND_JSON")/" src/brand-colors.ts
+          
+          # Success
+          sed -i "s/SUCCESS_NAME/$(jq -r '.colors.success.name' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/SUCCESS_HEX/$(jq -r '.colors.success.hex' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/SUCCESS_R/$(jq -r '.colors.success.rgb[0]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/SUCCESS_G/$(jq -r '.colors.success.rgb[1]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/SUCCESS_B/$(jq -r '.colors.success.rgb[2]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/SUCCESS_USAGE/$(jq -r '.colors.success.usage' "$BRAND_JSON")/" src/brand-colors.ts
+          
+          # Warning
+          sed -i "s/WARNING_NAME/$(jq -r '.colors.warning.name' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/WARNING_HEX/$(jq -r '.colors.warning.hex' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/WARNING_R/$(jq -r '.colors.warning.rgb[0]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/WARNING_G/$(jq -r '.colors.warning.rgb[1]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/WARNING_B/$(jq -r '.colors.warning.rgb[2]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/WARNING_USAGE/$(jq -r '.colors.warning.usage' "$BRAND_JSON")/" src/brand-colors.ts
+          
+          # Error
+          sed -i "s/ERROR_NAME/$(jq -r '.colors.error.name' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/ERROR_HEX/$(jq -r '.colors.error.hex' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/ERROR_R/$(jq -r '.colors.error.rgb[0]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/ERROR_G/$(jq -r '.colors.error.rgb[1]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/ERROR_B/$(jq -r '.colors.error.rgb[2]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/ERROR_USAGE/$(jq -r '.colors.error.usage' "$BRAND_JSON")/" src/brand-colors.ts
+          
+          # White
+          sed -i "s/WHITE_NAME/$(jq -r '.colors.white.name' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/WHITE_HEX/$(jq -r '.colors.white.hex' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/WHITE_R/$(jq -r '.colors.white.rgb[0]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/WHITE_G/$(jq -r '.colors.white.rgb[1]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/WHITE_B/$(jq -r '.colors.white.rgb[2]' "$BRAND_JSON")/" src/brand-colors.ts
+          sed -i "s/WHITE_USAGE/$(jq -r '.colors.white.usage' "$BRAND_JSON")/" src/brand-colors.ts
+          
+          # Update CSS variables in global.css
+          PRIMARY_HEX=$(jq -r '.colors.primary.hex' "$BRAND_JSON")
+          SECONDARY_HEX=$(jq -r '.colors.secondary.hex' "$BRAND_JSON")
+          NEUTRAL_DARK_HEX=$(jq -r '.colors.neutral_dark.hex' "$BRAND_JSON")
+          NEUTRAL_MEDIUM_HEX=$(jq -r '.colors.neutral_medium.hex' "$BRAND_JSON")
+          NEUTRAL_LIGHT_HEX=$(jq -r '.colors.neutral_light.hex' "$BRAND_JSON")
+          SUCCESS_HEX=$(jq -r '.colors.success.hex' "$BRAND_JSON")
+          WARNING_HEX=$(jq -r '.colors.warning.hex' "$BRAND_JSON")
+          ERROR_HEX=$(jq -r '.colors.error.hex' "$BRAND_JSON")
+          WHITE_HEX=$(jq -r '.colors.white.hex' "$BRAND_JSON")
+          
+          sed -i "s/--color-brand-primary: #[0-9A-Fa-f]\{6\}/--color-brand-primary: $PRIMARY_HEX/" src/styles/global.css
+          sed -i "s/--color-brand-secondary: #[0-9A-Fa-f]\{6\}/--color-brand-secondary: $SECONDARY_HEX/" src/styles/global.css
+          sed -i "s/--color-neutral-dark: #[0-9A-Fa-f]\{6\}/--color-neutral-dark: $NEUTRAL_DARK_HEX/" src/styles/global.css
+          sed -i "s/--color-neutral-medium: #[0-9A-Fa-f]\{6\}/--color-neutral-medium: $NEUTRAL_MEDIUM_HEX/" src/styles/global.css
+          sed -i "s/--color-neutral-light: #[0-9A-Fa-f]\{6\}/--color-neutral-light: $NEUTRAL_LIGHT_HEX/" src/styles/global.css
+          sed -i "s/--color-success: #[0-9A-Fa-f]\{6\}/--color-success: $SUCCESS_HEX/" src/styles/global.css
+          sed -i "s/--color-warning: #[0-9A-Fa-f]\{6\}/--color-warning: $WARNING_HEX/" src/styles/global.css
+          sed -i "s/--color-error: #[0-9A-Fa-f]\{6\}/--color-error: $ERROR_HEX/" src/styles/global.css
+          sed -i "s/--color-white: #[0-9A-Fa-f]\{6\}/--color-white: $WHITE_HEX/" src/styles/global.css
+          
+          sed -i "s/Version: [0-9.]\+/Version: $LATEST_VERSION/" src/styles/global.css
+          sed -i "s/Last Synced: [0-9-]\+/Last Synced: $(date +%Y-%m-%d)/" src/styles/global.css
+          
+          # Update BRANDING.md
+          sed -i "s/\*\*Current Version\*\*: [0-9.]\+/**Current Version**: $LATEST_VERSION/" BRANDING.md
+          sed -i "s/\*\*Last Synced\*\*: [0-9-]\+/**Last Synced**: $(date +%Y-%m-%d)/" BRANDING.md
+          
+          echo "✅ Brand standards synced to version $LATEST_VERSION"
+      
+      - name: Create Pull Request
+        if: steps.check-version.outputs.needs_update == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            Sync brand standards to v${{ steps.check-version.outputs.latest_version }}
+            
+            - Update brand colors from company-branding repository
+            - Update CSS variables with latest brand colors
+            - Update configuration with new brand version
+            - Sync from: https://github.com/beezly/company-branding
+          branch: brand-sync-${{ steps.check-version.outputs.latest_version }}
+          delete-branch: true
+          title: "🎨 Sync brand standards to v${{ steps.check-version.outputs.latest_version }}"
+          body: |
+            ## Brand Standards Update
+            
+            This PR syncs the website with the latest brand standards from the [company-branding repository](https://github.com/beezly/company-branding).
+            
+            **Version Update**: `${{ steps.check-version.outputs.current_version }}` → `${{ steps.check-version.outputs.latest_version }}`
+            
+            ### Changes
+            - ✅ Updated brand colors in `src/brand-colors.ts`
+            - ✅ Updated CSS variables in `src/styles/global.css`
+            - ✅ Updated configuration in `src/config.ts`
+            - ✅ Updated documentation in `BRANDING.md`
+            
+            ### Review Checklist
+            - [ ] Review color changes
+            - [ ] Test build locally (`npm run build`)
+            - [ ] Preview site (`npm run preview`)
+            - [ ] Verify brand consistency
+            
+            ### Next Steps
+            1. Review the changes
+            2. Test locally if needed
+            3. Merge this PR
+            4. The site will automatically deploy with the new branding
+            
+            ---
+            🤖 This PR was automatically created by the brand sync workflow.
+          labels: |
+            branding
+            automated
+      
+      - name: Summary
+        run: |
+          if [ "${{ steps.check-version.outputs.needs_update }}" == "true" ]; then
+            echo "✨ Brand update PR created: v${{ steps.check-version.outputs.current_version }} → v${{ steps.check-version.outputs.latest_version }}"
+          else
+            echo "✅ Brand is already up to date (v${{ steps.check-version.outputs.current_version }})"
+          fi

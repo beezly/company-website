@@ -244,6 +244,8 @@ This website is integrated with the **Project Rhubarb** brand standards. All col
 **Brand Repository**: [github.com/beezly/company-branding](https://github.com/beezly/company-branding)  
 **Current Version**: 1.2.0
 
+**Automated Sync**: Use the "Sync Brand Standards" GitHub Action to automatically check for and apply brand updates.
+
 For detailed information about brand integration and synchronization, see [BRANDING.md](BRANDING.md).
 
 **Key Brand Files**:

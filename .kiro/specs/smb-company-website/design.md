@@ -478,6 +478,33 @@ The website can also be deployed to other static hosting services:
 
 ### Synchronization Workflow
 
+#### Automated Synchronization (Recommended)
+
+A GitHub Actions workflow (`.github/workflows/sync-brand.yml`) automates brand synchronization:
+
+**Trigger**: Manual workflow dispatch or optional scheduled runs
+
+**Process**:
+1. Checks out both website and brand repositories
+2. Compares current brand version with latest version
+3. If update available:
+   - Extracts brand data from `brand.json`
+   - Updates `src/config.ts` with new version and company name
+   - Updates `src/brand-colors.ts` with new color values
+   - Updates CSS variables in `src/styles/global.css`
+   - Updates `BRANDING.md` documentation
+4. Creates a Pull Request with all changes
+5. PR includes detailed summary and review checklist
+
+**Benefits**:
+- No manual file editing required
+- Consistent synchronization process
+- Automatic change detection
+- Review changes before deployment
+- Full audit trail via PR
+
+#### Manual Synchronization (Alternative)
+
 When brand standards are updated in the company-branding repository:
 
 1. **Review Changes**: Check the brand.json file for updates to colors, typography, or other elements
