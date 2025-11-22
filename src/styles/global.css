@@ -19,7 +19,10 @@
 @theme {
   /* Primary Colors */
   --color-brand-primary: #D64161;
+  --color-brand-primary-dark: #B83651;
+  --color-brand-primary-light: #E05577;
   --color-brand-secondary: #5A8F5A;
+  --color-brand-secondary-dark: #4A7A4A;
   
   /* Neutral Colors */
   --color-neutral-dark: #2C3E50;

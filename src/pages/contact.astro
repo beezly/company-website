@@ -5,7 +5,7 @@ import { siteConfig } from '../config';
 
 <Layout title="Contact Us" description={`Get in touch with ${siteConfig.companyName} for all your managed IT service needs`}>
   <!-- Page Header -->
-  <section class="bg-blue-600 text-white py-10 sm:py-12 md:py-16">
+  <section class="bg-brand-primary text-white py-10 sm:py-12 md:py-16">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4">Contact Us</h1>
       <p class="text-base sm:text-lg md:text-xl lg:text-2xl">
@@ -28,33 +28,33 @@ import { siteConfig } from '../config';
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-10 sm:mb-12">
           <!-- Email -->
           <div class="bg-white p-5 sm:p-6 md:p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow text-center">
-            <div class="text-blue-600 text-4xl mb-3 sm:mb-4">
+            <div class="text-brand-primary text-4xl mb-3 sm:mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 sm:h-12 sm:w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
             <h3 class="text-base sm:text-lg md:text-xl font-semibold mb-2">Email</h3>
-            <a href={`mailto:${siteConfig.contact.email}`} class="text-sm sm:text-base text-blue-600 hover:text-blue-800 break-all">
+            <a href={`mailto:${siteConfig.contact.email}`} class="text-sm sm:text-base text-brand-primary hover:text-brand-primary-dark break-all">
               {siteConfig.contact.email}
             </a>
           </div>
 
           <!-- Phone -->
           <div class="bg-white p-5 sm:p-6 md:p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow text-center">
-            <div class="text-blue-600 text-4xl mb-3 sm:mb-4">
+            <div class="text-brand-primary text-4xl mb-3 sm:mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 sm:h-12 sm:w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
             </div>
             <h3 class="text-base sm:text-lg md:text-xl font-semibold mb-2">Phone</h3>
-            <a href={`tel:${siteConfig.contact.phone.replace(/[^0-9]/g, '')}`} class="text-sm sm:text-base text-blue-600 hover:text-blue-800">
+            <a href={`tel:${siteConfig.contact.phone.replace(/[^0-9]/g, '')}`} class="text-sm sm:text-base text-brand-primary hover:text-brand-primary-dark">
               {siteConfig.contact.phone}
             </a>
           </div>
 
           <!-- Address -->
           <div class="bg-white p-5 sm:p-6 md:p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow text-center sm:col-span-2 lg:col-span-1">
-            <div class="text-blue-600 text-4xl mb-3 sm:mb-4">
+            <div class="text-brand-primary text-4xl mb-3 sm:mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 sm:h-12 sm:w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -106,7 +106,7 @@ import { siteConfig } from '../config';
                 href={siteConfig.social.linkedin} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                class="text-blue-600 hover:text-blue-800 transition"
+                class="text-brand-primary hover:text-brand-primary-dark transition"
                 aria-label="LinkedIn"
               >
                 <svg class="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12" fill="currentColor" viewBox="0 0 24 24">
@@ -119,7 +119,7 @@ import { siteConfig } from '../config';
                 href={siteConfig.social.twitter} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                class="text-blue-600 hover:text-blue-800 transition"
+                class="text-brand-primary hover:text-brand-primary-dark transition"
                 aria-label="Twitter"
               >
                 <svg class="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12" fill="currentColor" viewBox="0 0 24 24">
@@ -134,7 +134,7 @@ import { siteConfig } from '../config';
   )}
 
   <!-- Call-to-Action -->
-  <section class="py-12 sm:py-16 md:py-20 bg-blue-600 text-white">
+  <section class="py-12 sm:py-16 md:py-20 bg-brand-primary text-white">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 md:mb-6">
         Ready to Get Started?
@@ -144,7 +144,7 @@ import { siteConfig } from '../config';
       </p>
       <a 
         href={`mailto:${siteConfig.contact.email}`}
-        class="inline-block bg-white text-blue-600 px-6 py-2.5 sm:px-8 sm:py-3 md:px-10 md:py-4 rounded-lg text-sm sm:text-base md:text-lg font-semibold hover:bg-gray-100 transition shadow-lg"
+        class="inline-block bg-white text-brand-primary px-6 py-2.5 sm:px-8 sm:py-3 md:px-10 md:py-4 rounded-lg text-sm sm:text-base md:text-lg font-semibold hover:bg-gray-100 transition shadow-lg"
       >
         Send Us an Email
       </a>

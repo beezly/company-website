@@ -17,7 +17,7 @@ const navLinks = [
     <div class="flex items-center justify-between">
       <!-- Company Name / Logo -->
       <div class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
-        <a href={`${base}/`} class="hover:text-blue-600 transition-colors">
+        <a href={`${base}/`} class="hover:text-brand-primary transition-colors">
           {siteConfig.companyName}
         </a>
       </div>
@@ -40,8 +40,8 @@ const navLinks = [
           <li>
             <a 
               href={link.href}
-              class={`text-sm lg:text-base hover:text-blue-600 transition-colors ${
-                currentPath === link.href ? 'text-blue-600 font-semibold' : 'text-gray-700'
+              class={`text-sm lg:text-base hover:text-brand-primary transition-colors ${
+                currentPath === link.href ? 'text-brand-primary font-semibold' : 'text-gray-700'
               }`}
             >
               {link.label}
@@ -59,7 +59,7 @@ const navLinks = [
             <a 
               href={link.href}
               class={`block py-2 px-4 rounded hover:bg-gray-100 transition-colors ${
-                currentPath === link.href ? 'text-blue-600 font-semibold bg-gray-50' : 'text-gray-700'
+                currentPath === link.href ? 'text-brand-primary font-semibold bg-gray-50' : 'text-gray-700'
               }`}
             >
               {link.label}
