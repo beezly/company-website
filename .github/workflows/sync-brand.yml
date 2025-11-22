@@ -1,8 +1,7 @@
 name: Sync Brand Standards
 
 on:
-  # Manual trigger - run when you want to check for brand updates
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger - run when you want to check for brand updates
   
   # Optional: Run weekly to check for updates (commented out by default)
   # schedule:
