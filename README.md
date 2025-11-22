@@ -17,6 +17,7 @@ A modern, statically-hosted company website for small-to-medium business managed
 - 🔍 SEO-optimized with meta tags and sitemap generation
 - ⚙️ Centralized configuration for easy branding updates
 - 📝 Four main pages: Home, Services, About, Contact
+- 🔐 Built-in secret detection to prevent committing API keys
 
 ## Setup Instructions
 
@@ -277,6 +278,8 @@ Place images in the `public/` directory and reference them with absolute paths:
 | `npm run build` | Build production site to `./dist/` |
 | `npm run preview` | Preview production build locally |
 | `npm run astro` | Run Astro CLI commands |
+| `npm run security:scan` | Scan repository for secrets/API keys |
+| `npm run security:protect` | Scan staged files before commit |
 
 ## Browser Support
 
@@ -296,6 +299,16 @@ Place images in the `public/` directory and reference them with absolute paths:
 ## License
 
 [Your License Here]
+
+## Security
+
+This project includes automatic secret detection to prevent accidentally committing API keys, tokens, or passwords.
+
+- **Pre-commit hook**: Automatically scans for secrets before each commit
+- **GitHub Actions**: Scans on every push and pull request
+- **Manual scanning**: Run `npm run security:scan` anytime
+
+See [SECURITY.md](SECURITY.md) for detailed information about security features and best practices.
 
 ## Support
 

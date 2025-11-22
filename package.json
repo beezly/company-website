@@ -9,7 +9,10 @@
     "astro": "astro",
     "test": "vitest --run",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "prepare": "husky",
+    "security:scan": "gitleaks detect --source . --verbose",
+    "security:protect": "gitleaks protect --source . --verbose"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.6.0",
@@ -18,8 +21,11 @@
     "tailwindcss": "^4.1.17"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
     "@vitest/ui": "^4.0.13",
     "fast-check": "^4.3.0",
+    "gitleaks": "^1.0.0",
+    "husky": "^9.1.7",
     "jsdom": "^27.2.0",
     "vitest": "^4.0.13"
   }

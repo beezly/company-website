@@ -1,0 +1,73 @@
+# Gitleaks configuration for detecting secrets
+title = "Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+# Custom rules for common patterns
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)(api[_-]?key|apikey|api[_-]?secret)[_-]?[:=]\s*['"]?[a-zA-Z0-9]{20,}['"]?'''
+tags = ["key", "API"]
+
+[[rules]]
+id = "private-key"
+description = "Private Key"
+regex = '''-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----'''
+tags = ["key", "private"]
+
+[[rules]]
+id = "aws-access-key"
+description = "AWS Access Key"
+regex = '''AKIA[0-9A-Z]{16}'''
+tags = ["key", "AWS"]
+
+[[rules]]
+id = "slack-token"
+description = "Slack Token"
+regex = '''xox[baprs]-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24,32}'''
+tags = ["key", "Slack"]
+
+[[rules]]
+id = "stripe-key"
+description = "Stripe API Key"
+regex = '''(?i)(sk|pk)_(test|live)_[0-9a-zA-Z]{24,}'''
+tags = ["key", "Stripe"]
+
+[[rules]]
+id = "github-token"
+description = "GitHub Token"
+regex = '''ghp_[0-9a-zA-Z]{36}'''
+tags = ["key", "GitHub"]
+
+[[rules]]
+id = "google-api-key"
+description = "Google API Key"
+regex = '''AIza[0-9A-Za-z\\-_]{35}'''
+tags = ["key", "Google"]
+
+# Allowlist for false positives
+[allowlist]
+description = "Allowlisted files and patterns"
+paths = [
+  '''\.gitleaks\.toml''',
+  '''package-lock\.json''',
+  '''node_modules/''',
+  '''dist/''',
+  '''.git/''',
+  '''SECURITY\.md''',
+  '''DEPLOYMENT\.md''',
+  '''README\.md'''
+]
+
+# Allowlist example patterns that are not real secrets
+regexes = [
+  '''example\.com''',
+  '''your-api-key-here''',
+  '''YOUR_API_KEY''',
+  '''<API_KEY>''',
+  '''placeholder''',
+  '''dummy''',
+  '''test-key-123'''
+]
