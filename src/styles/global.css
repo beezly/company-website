@@ -1,4 +1,68 @@
+/**
+ * Project Rhubarb Brand Standards
+ * 
+ * These styles are synchronized with the official brand standards
+ * Repository: https://github.com/beezly/company-branding
+ * Version: 1.2.0
+ * Last Synced: 2025-11-22
+ * 
+ * DO NOT modify brand colors or typography directly.
+ * All changes should be made in the company-branding repository.
+ */
+
+/* Import Inter font from Google Fonts - must be before other imports */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 @import "tailwindcss";
+
+/* Brand Color Palette */
+@theme {
+  /* Primary Colors */
+  --color-brand-primary: #D64161;
+  --color-brand-secondary: #5A8F5A;
+  
+  /* Neutral Colors */
+  --color-neutral-dark: #2C3E50;
+  --color-neutral-medium: #7F8C8D;
+  --color-neutral-light: #ECF0F1;
+  
+  /* Status Colors */
+  --color-success: #27AE60;
+  --color-warning: #F39C12;
+  --color-error: #E74C3C;
+  
+  /* Base Colors */
+  --color-white: #FFFFFF;
+  
+  /* Typography */
+  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  
+  /* Spacing (8px base unit) */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+}
+
+/* Apply brand typography */
+body {
+  font-family: var(--font-family-primary);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--color-neutral-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-primary);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-neutral-dark);
+}
 
 /* Responsive image styling */
 img {
@@ -19,10 +83,4 @@ main img {
 /* Smooth scrolling for better UX */
 html {
   scroll-behavior: smooth;
-}
-
-/* Improve text rendering */
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }

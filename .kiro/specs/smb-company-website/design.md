@@ -17,6 +17,7 @@ The website will consist of four main pages (Home, Services, About, Contact) wit
 - **Secret Detection**: Gitleaks - Automated secret scanning tool
 - **CI/CD**: GitHub Actions - Automated build, test, and deployment pipeline
 - **Git Hooks**: Husky - Pre-commit hook management
+- **Brand Standards**: Project Rhubarb Brand Standards (v1.2.0) - Centralized brand guidelines repository
 
 ### Project Structure
 
@@ -71,23 +72,62 @@ export interface SiteConfig {
     linkedin?: string;
     twitter?: string;
   };
+  branding: {
+    repositoryUrl: string;
+    version: string;
+  };
 }
 
 export const siteConfig: SiteConfig = {
-  companyName: "Your Company Name",
+  companyName: "Project Rhubarb",
   tagline: "Reliable Managed IT Services",
   description: "Professional managed services for small and medium businesses",
   contact: {
-    email: "contact@example.com",
+    email: "contact@projectrhubarb.com",
     phone: "(555) 123-4567",
     address: "123 Business St, City, ST 12345"
   },
   social: {
     linkedin: "",
     twitter: ""
+  },
+  branding: {
+    repositoryUrl: "https://github.com/beezly/company-branding",
+    version: "1.2.0"
   }
 };
 ```
+
+### Brand Standards Integration
+
+**Repository**: https://github.com/beezly/company-branding
+**Version**: 1.2.0
+
+The website integrates with the Project Rhubarb brand standards repository to ensure consistent branding across all projects. Brand elements are synchronized from the central repository:
+
+**Brand Colors** (`src/brand-colors.ts`):
+- Primary: Rhubarb Pink (#D64161)
+- Secondary: Rhubarb Green (#5A8F5A)
+- Neutral colors for text and backgrounds
+- Status colors for success, warning, and error states
+
+**Typography**:
+- Primary font: Inter (Google Fonts)
+- Weights: 400 (Regular), 500 (Medium), 600 (Semi-Bold), 700 (Bold), 800 (Extra-Bold), 900 (Black)
+- Applied via CSS custom properties in `src/styles/global.css`
+
+**Logo Assets**:
+- Available from: `https://raw.githubusercontent.com/beezly/company-branding/main/brand-standards/assets/logos/`
+- Variants: primary, light, dark, icon, wordmark, stacked
+
+**Synchronization Process**:
+1. Brand standards are maintained in the company-branding repository
+2. Website references specific version of brand standards
+3. When brand standards are updated, website can be synchronized by:
+   - Updating brand colors in `src/brand-colors.ts`
+   - Updating CSS custom properties in `src/styles/global.css`
+   - Updating version number in `src/config.ts`
+   - Committing changes with reference to brand standards version
 
 ### Layout Component
 
@@ -434,6 +474,38 @@ The website can also be deployed to other static hosting services:
 4. **Color Contrast**: Use sufficient color contrast for text readability
 5. **Responsive Design**: Ensure usability across all device sizes
 
+## Brand Standards Maintenance
+
+### Synchronization Workflow
+
+When brand standards are updated in the company-branding repository:
+
+1. **Review Changes**: Check the brand.json file for updates to colors, typography, or other elements
+2. **Update Brand Colors**: Modify `src/brand-colors.ts` with new color values
+3. **Update CSS Variables**: Update CSS custom properties in `src/styles/global.css`
+4. **Update Configuration**: Update brand version in `src/config.ts`
+5. **Test Changes**: Run tests to ensure no visual regressions
+6. **Document Changes**: Update CHANGELOG or commit message with brand version reference
+7. **Deploy**: Push changes to trigger automated deployment
+
+### Brand Consistency Checks
+
+To maintain brand consistency:
+
+- All colors must come from `src/brand-colors.ts` or CSS custom properties
+- Typography must use Inter font family as specified in brand standards
+- Logo assets must be referenced from the brand standards repository
+- Spacing should follow the 8px base unit system
+- Comments in code should reference brand standards version
+
+### Automated Brand Validation
+
+Future enhancement: Create automated tests to validate:
+- Colors used in components match brand standards
+- Typography specifications are correctly applied
+- Logo assets are properly referenced
+- Spacing follows brand guidelines
+
 ## Future Enhancements
 
 Potential future improvements not included in initial scope:
@@ -444,3 +516,4 @@ Potential future improvements not included in initial scope:
 4. **Analytics**: Add privacy-friendly analytics (Plausible, Fathom)
 5. **CMS Integration**: Connect to a headless CMS for non-technical content updates
 6. **Multi-language Support**: Add internationalization for multiple languages
+7. **Automated Brand Sync**: Create a script to automatically sync brand standards from the repository

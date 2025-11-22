@@ -18,6 +18,7 @@ A modern, statically-hosted company website for small-to-medium business managed
 - ⚙️ Centralized configuration for easy branding updates
 - 📝 Four main pages: Home, Services, About, Contact
 - 🔐 Built-in secret detection to prevent committing API keys
+- 🎨 Integrated with [Project Rhubarb brand standards](https://github.com/beezly/company-branding) (v1.2.0)
 
 ## Setup Instructions
 
@@ -236,6 +237,22 @@ smb-company-website/
 
 ## Customization
 
+### Brand Standards
+
+This website is integrated with the **Project Rhubarb** brand standards. All colors, typography, and visual elements are synchronized with the official brand repository.
+
+**Brand Repository**: [github.com/beezly/company-branding](https://github.com/beezly/company-branding)  
+**Current Version**: 1.2.0
+
+For detailed information about brand integration and synchronization, see [BRANDING.md](BRANDING.md).
+
+**Key Brand Files**:
+- `src/config.ts` - Company information and brand version
+- `src/brand-colors.ts` - Brand color definitions
+- `src/styles/global.css` - Brand typography and CSS variables
+
+**Important**: Do not modify brand colors or typography directly. All brand changes should be made in the company-branding repository and then synchronized to this project.
+
 ### Adding New Pages
 
 1. Create a new `.astro` file in `src/pages/`
@@ -256,10 +273,11 @@ import { siteConfig } from '../config';
 
 ### Modifying Styles
 
-This project uses Tailwind CSS. You can:
+This project uses Tailwind CSS with brand-specific customizations:
+- Use brand colors via CSS custom properties (e.g., `var(--color-brand-primary)`)
 - Add utility classes directly in `.astro` files
-- Customize Tailwind configuration in `tailwind.config.mjs`
-- Add custom CSS in `src/styles/global.css`
+- Add custom CSS in `src/styles/global.css` (non-brand styles only)
+- Follow the 8px spacing system defined in brand standards
 
 ### Adding Images
 
