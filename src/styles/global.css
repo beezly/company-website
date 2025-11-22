@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+/* Responsive image styling */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Ensure images in content areas are responsive */
+article img,
+section img,
+main img {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improve text rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

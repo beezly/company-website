@@ -1,0 +1,148 @@
+---
+import Layout from '../components/Layout.astro';
+import { siteConfig } from '../config';
+---
+
+<Layout title="About Us" description={`Learn more about ${siteConfig.companyName} and our commitment to excellence in managed IT services`}>
+  <!-- Page Header -->
+  <section class="bg-blue-600 text-white py-10 sm:py-12 md:py-16">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4">About Us</h1>
+      <p class="text-base sm:text-lg md:text-xl lg:text-2xl">
+        Your trusted partner in managed IT services
+      </p>
+    </div>
+  </section>
+
+  <!-- Company Background -->
+  <section class="py-12 sm:py-16 md:py-20">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">Our Story</h2>
+        <div class="prose prose-sm sm:prose-base md:prose-lg max-w-none text-gray-700 space-y-3 sm:space-y-4">
+          <p>
+            {siteConfig.companyName} was founded with a simple mission: to provide small and medium-sized 
+            businesses with enterprise-level IT services at an affordable price. We understand that technology 
+            is the backbone of modern business, and we're committed to ensuring your IT infrastructure 
+            supports your growth and success.
+          </p>
+          <p>
+            With years of experience in the managed services industry, our team has helped countless 
+            businesses streamline their operations, improve security, and reduce IT costs. We take pride 
+            in building long-term partnerships with our clients, becoming an extension of their team and 
+            a trusted advisor for all their technology needs.
+          </p>
+          <p>
+            Our approach is simple: we listen to your needs, understand your business goals, and deliver 
+            tailored IT solutions that drive results. Whether you're looking to migrate to the cloud, 
+            enhance your cybersecurity, or simply need reliable day-to-day IT support, we're here to help.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission and Values -->
+  <section class="py-12 sm:py-16 md:py-20 bg-gray-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-8 sm:mb-10 md:mb-12 text-center">Our Mission & Values</h2>
+        
+        <div class="space-y-6 sm:space-y-8">
+          <!-- Mission -->
+          <div class="bg-white p-6 sm:p-8 md:p-10 rounded-lg shadow-md">
+            <h3 class="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 text-blue-600">Our Mission</h3>
+            <p class="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed">
+              To empower small and medium-sized businesses with reliable, secure, and innovative IT 
+              solutions that enable them to compete and thrive in the digital age.
+            </p>
+          </div>
+
+          <!-- Values -->
+          <div class="bg-white p-6 sm:p-8 md:p-10 rounded-lg shadow-md">
+            <h3 class="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 text-blue-600">Our Core Values</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div>
+                <h4 class="text-base sm:text-lg md:text-xl font-semibold mb-1.5 sm:mb-2">Reliability</h4>
+                <p class="text-sm sm:text-base text-gray-700">
+                  We're committed to providing consistent, dependable service that you can count on 24/7.
+                </p>
+              </div>
+              <div>
+                <h4 class="text-base sm:text-lg md:text-xl font-semibold mb-1.5 sm:mb-2">Transparency</h4>
+                <p class="text-sm sm:text-base text-gray-700">
+                  We believe in clear communication, honest pricing, and no hidden fees or surprises.
+                </p>
+              </div>
+              <div>
+                <h4 class="text-base sm:text-lg md:text-xl font-semibold mb-1.5 sm:mb-2">Innovation</h4>
+                <p class="text-sm sm:text-base text-gray-700">
+                  We stay ahead of technology trends to bring you the most effective and modern solutions.
+                </p>
+              </div>
+              <div>
+                <h4 class="text-base sm:text-lg md:text-xl font-semibold mb-1.5 sm:mb-2">Partnership</h4>
+                <p class="text-sm sm:text-base text-gray-700">
+                  We view our clients as partners and invest in their long-term success and growth.
+                </p>
+              </div>
+              <div>
+                <h4 class="text-base sm:text-lg md:text-xl font-semibold mb-1.5 sm:mb-2">Security</h4>
+                <p class="text-sm sm:text-base text-gray-700">
+                  We prioritize the protection of your data and systems with industry-leading security practices.
+                </p>
+              </div>
+              <div>
+                <h4 class="text-base sm:text-lg md:text-xl font-semibold mb-1.5 sm:mb-2">Excellence</h4>
+                <p class="text-sm sm:text-base text-gray-700">
+                  We strive for excellence in everything we do, from technical support to strategic consulting.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us -->
+  <section class="py-12 sm:py-16 md:py-20">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 md:mb-10 text-center">Why Choose Us</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+          <div class="text-center p-4 sm:p-6 bg-gray-50 rounded-lg">
+            <div class="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-600 mb-2">10+</div>
+            <p class="text-sm sm:text-base md:text-lg text-gray-700 font-medium">Years of Experience</p>
+          </div>
+          <div class="text-center p-4 sm:p-6 bg-gray-50 rounded-lg">
+            <div class="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-600 mb-2">100+</div>
+            <p class="text-sm sm:text-base md:text-lg text-gray-700 font-medium">Satisfied Clients</p>
+          </div>
+          <div class="text-center p-4 sm:p-6 bg-gray-50 rounded-lg">
+            <div class="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-600 mb-2">24/7</div>
+            <p class="text-sm sm:text-base md:text-lg text-gray-700 font-medium">Support Available</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call-to-Action -->
+  <section class="py-12 sm:py-16 md:py-20 bg-blue-600 text-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 md:mb-6">
+        Ready to Work Together?
+      </h2>
+      <p class="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 max-w-2xl mx-auto">
+        Let's discuss how we can support your business with our managed IT services
+      </p>
+      <a 
+        href="/contact" 
+        class="inline-block bg-white text-blue-600 px-6 py-2.5 sm:px-8 sm:py-3 md:px-10 md:py-4 rounded-lg text-sm sm:text-base md:text-lg font-semibold hover:bg-gray-100 transition shadow-lg"
+      >
+        Contact Us
+      </a>
+    </div>
+  </section>
+</Layout>
