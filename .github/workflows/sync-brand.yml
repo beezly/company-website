@@ -19,7 +19,7 @@ jobs:
         with:
           repository: beezly/company-branding
           path: brand-repo
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BRAND_REPO_TOKEN }}
       
       - name: Setup Node
         uses: actions/setup-node@v4
