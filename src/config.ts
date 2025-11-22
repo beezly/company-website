@@ -45,3 +45,18 @@ export const siteConfig: SiteConfig = {
     version: "1.2.0"
   }
 };
+
+/**
+ * Helper function to create paths that work with the configured base URL.
+ * This ensures links work correctly whether deployed to a subdirectory or root domain.
+ * 
+ * Usage: getPath('/about') -> '/company-website/about' (on GitHub Pages)
+ *        getPath('/about') -> '/about' (on custom domain)
+ */
+export function getPath(path: string): string {
+  // In Astro components, use import.meta.env.BASE_URL
+  // This function is for use in non-Astro contexts
+  const base = import.meta.env.BASE_URL || '/';
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return base === '/' ? normalizedPath : `${base}${normalizedPath}`;
+}

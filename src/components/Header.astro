@@ -2,12 +2,13 @@
 import { siteConfig } from '../config';
 
 const currentPath = Astro.url.pathname;
+const base = import.meta.env.BASE_URL;
 
 const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/services', label: 'Services' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' }
+  { href: `${base}`, label: 'Home' },
+  { href: `${base}services`, label: 'Services' },
+  { href: `${base}about`, label: 'About' },
+  { href: `${base}contact`, label: 'Contact' }
 ];
 ---
 
@@ -16,7 +17,7 @@ const navLinks = [
     <div class="flex items-center justify-between">
       <!-- Company Name / Logo -->
       <div class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
-        <a href="/" class="hover:text-blue-600 transition-colors">
+        <a href={base} class="hover:text-blue-600 transition-colors">
           {siteConfig.companyName}
         </a>
       </div>
