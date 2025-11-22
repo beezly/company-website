@@ -26,10 +26,8 @@ jobs:
         with:
           node-version: '20'
       
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+      - name: Install dependencies
+        run: npm ci
       
       - name: Check brand version
         id: check-version
@@ -59,8 +57,7 @@ jobs:
       - name: Sync brand standards
         if: steps.check-version.outputs.needs_update == 'true'
         run: |
-          chmod +x .github/scripts/sync-brand.py
-          python3 .github/scripts/sync-brand.py "${{ steps.check-version.outputs.latest_version }}"
+          npx tsx .github/scripts/sync-brand.ts "${{ steps.check-version.outputs.latest_version }}"
       
       - name: Create Pull Request
         if: steps.check-version.outputs.needs_update == 'true'
